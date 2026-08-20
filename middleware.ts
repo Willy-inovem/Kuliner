@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // 1. Ganti nama fungsi dari "middleware" menjadi "proxy"
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   // 2. Isi fungsi di dalamnya TIDAK PERLU diganti
   // Logika kamu di sini, misalnya:
   // return checkAuth(request);

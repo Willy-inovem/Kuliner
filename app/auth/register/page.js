@@ -2,50 +2,55 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // Import Link untuk navigasi
+import Link from 'next/link';
 import { register } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
-  // Perbaikan State Mismatch: Sesuaikan kunci state dengan input handler (username)
   const [form, setForm] = useState({
     username: '',
     password: '',
-    role: 'user'
+    role: 'USER'  // 🔥 UBAH: dari 'user' jadi 'USER' (huruf besar)
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
     try {
-      const result = await register(form);
-      // Asumsi API mengembalikan struktur yang konsisten
-      if (result.id || result.success || result.message === 'Registration successful') {
+      // 🔥 Kirim role dalam huruf besar
+      const dataToSend = {
+        username: form.username,
+        password: form.password,
+        role: form.role.toUpperCase() // 🔥 PASTIKAN HURUF BESAR
+      };
+      
+      const result = await register(dataToSend);
+      
+      if (result.success || result.message === 'Registration successful') {
         alert('🎉 Registrasi berhasil! Silakan login dengan akun baru Anda.');
-        router.push('/login');
+        router.push('/auth/login');
       } else {
-        alert('Registrasi gagal: ' + (result.message || 'Terjadi kesalahan'));
+        setError(result.message || 'Registrasi gagal');
       }
     } catch (error) {
-      alert('Terjadi kesalahan sistem: ' + error.message);
+      console.error('Register error:', error);
+      setError(error.message || 'Terjadi kesalahan sistem');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // Wrapper Full Screen dengan Background Gradient Lembut
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-amber-100 p-4 font-sans">
       
-      {/* Card Registrasi Modern */}
       <div className="max-w-md w-full bg-amber-950 rounded-2xl shadow-2xl p-8 border border-amber-900 transform transition-all">
         
-        {/* Header Section */}
         <div className="text-center mb-10">
           <div className="flex justify-center items-center gap-3 mb-3">
-             {/* Icon Placeholder - Bisa diganti Logo */}
             <span className="text-4xl">🍽️</span> 
             <h1 className="text-3xl font-extrabold text-amber-50 tracking-tight">
               Daftar Akun
@@ -56,17 +61,21 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Form Section */}
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Input Username */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-1">
             <label htmlFor="username" className="text-sm font-medium text-amber-100 block ml-1">
               Username
             </label>
             <input
               id="username"
-              type="text" // Diubah dari 'username' (invalid type) ke 'text'
+              type="text"
               placeholder="Masukkan username unik Anda"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
@@ -75,7 +84,6 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Input Password */}
           <div className="space-y-1">
             <label htmlFor="password" className="text-sm font-medium text-amber-100 block ml-1">
               Password
@@ -91,7 +99,6 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Input Role (styled select) */}
           <div className="space-y-1">
             <label htmlFor="role" className="text-sm font-medium text-amber-100 block ml-1">
               Daftar Sebagai
@@ -103,10 +110,10 @@ export default function RegisterPage() {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 className="w-full px-4 py-3 bg-amber-900/50 border border-amber-800 rounded-xl text-white appearance-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none cursor-pointer"
               >
-                <option value="user" className="bg-amber-950 text-white">Pelanggan</option>
-                <option value="admin" className="bg-amber-950 text-white">Administrator</option>
+                {/* 🔥 UBAH value nya ke huruf besar */}
+                <option value="USER" className="bg-amber-950 text-white">User</option>
+                <option value="ADMIN" className="bg-amber-950 text-white">Admin</option>
               </select>
-              {/* Custom Arrow Icon */}
               <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-amber-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -115,7 +122,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Tombol Register Bergradasi */}
           <div className="pt-4">
             <button
               type="submit"
@@ -124,7 +130,6 @@ export default function RegisterPage() {
             >
               {loading ? (
                 <>
-                  {/* Loading Spinner Simple */}
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Mendaftarkan...
                 </>
@@ -135,7 +140,6 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        {/* Footer Link */}
         <div className="mt-8 text-center border-t border-amber-900 pt-6">
           <p className="text-amber-200/60 text-sm">
             Sudah punya akun?{' '}
